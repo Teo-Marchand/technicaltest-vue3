@@ -1,4 +1,5 @@
 import { reactive } from 'vue';
+import { formatDate } from '../utils/formatDate';
 
 interface Receipt {
   date: Date;
@@ -26,5 +27,10 @@ export function useStore() {
     if (index !== -1) store.receipts.splice(index, 1);
   };
 
-  return { receipts: store.receipts, saveReceipt, editReceipt, deleteReceipt };
+  function receiptExistsOnDate(date: Date): boolean {
+    let formattedDate = formatDate(date);
+    return store.receipts.some(receipt => formatDate(receipt.date) === formattedDate);
+  }
+
+  return { receipts: store.receipts, saveReceipt, editReceipt, deleteReceipt, receiptExistsOnDate };
 }

@@ -40,6 +40,13 @@
           </div>
         </div>
 
+        <p v-if="formDataError.title" class="text-sm tracking-tight py-0">L'intitulé doit être au moins de 3 à 25
+          charactères.</p>
+        <p v-if="formDataError.date" class="text-sm tracking-tight py-0">La date doit être une date valide.</p>
+        <p v-if="formDataError.amount" class="text-sm tracking-tight py-0">Le montant doit être un nombre.</p>
+        <p v-if="formDataError.existAlreadyOnDate" class="text-sm tracking-tight py-0">Un reçu existe déjà pour cette
+          date.</p>
+
         <div class="flex items-center justify-end gap-2">
           <Button variant="outline" type="button" @click="cancel()">Annuler</Button>
           <Button variant="submit" type="submit">Enregistrer</Button>
@@ -74,7 +81,7 @@ const props = defineProps({
   }
 });
 
-const { editReceipt } = useStore();
+const { editReceipt, receiptExistsOnDate } = useStore();
 const visible = ref(false);
 
 const closeModal = () => visible.value = false;
@@ -94,10 +101,12 @@ const formDataError = reactive<{
   date: boolean;
   title: boolean;
   amount: boolean;
+  existAlreadyOnDate: boolean;
 }>({
   date: false,
   title: false,
   amount: false,
+  existAlreadyOnDate: false,
 });
 
 const cancel = (): void => {
@@ -115,6 +124,12 @@ const submit = (): void => {
     formDataError.amount = !!format.amount;
     return;
   }
+
+  if (receiptExistsOnDate(new Date(result.data.date))) {
+    formDataError.existAlreadyOnDate = true;
+    return;
+  }
+  formDataError.existAlreadyOnDate = false;
 
   editReceipt({
     amount: result.data.amount,
@@ -134,6 +149,7 @@ const reset = (): void => {
   formDataError.date = false;
   formDataError.title = false;
   formDataError.amount = false;
+  formDataError.existAlreadyOnDate = false;
 };
 
 
